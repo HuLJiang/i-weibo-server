@@ -1,0 +1,33 @@
+server:
+  port: 8899
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/weibo?UseUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: 123456
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  redis:
+    timeout: 20000
+    host: localhost
+    port: 6379
+  servlet:
+    multipart:
+      max-file-size: 10MB
+
+top:
+  hwlljy:
+    host: http://localhost:8083/api
+    loginUrl:
+    indexUrl:
+    file:
+      root: D:/test
+    anonymous: /user/login,/user/session,/user/register,/user/test/**,/user/token/expire,/user/tokenLogin,/user/workList,/user/getCheckMsg,/user/needLogin,/user/getUserTalk,/user/workDetail,/user/getUserWorkList,/user/getOneInfo,/user/searchTip,/user/getHotWord
+    role: 1-/user/**,4-/admin/**,64-/superAdmin/**
+    user:
+      attach: ${top.hwlljy.file.root}/user/attach/
+      prefix: http://localhost/attach/
+      tryTimes: 5
