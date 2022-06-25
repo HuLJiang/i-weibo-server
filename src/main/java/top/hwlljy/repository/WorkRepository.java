@@ -41,7 +41,7 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t) t3 on t1.id = t3.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname nickname2,head_img head_img2 from weibo_user\n" +
-            "\t) t4 on t1.user_id=t4.id", nativeQuery = true)
+            "\t) t4 on t1.user_id=t4.id order by t1.hot desc,t1.create_time desc", nativeQuery = true)
     List<Map<String, Object>> getWorkListForUser(@Param(value = "userIds") List<String> userIds, @Param(value = "workIds") List<String> workIds,
                                               @Param(value = "userId") String userId,@Param(value = "start") int start,
                                               @Param(value = "size") int size);
@@ -57,8 +57,13 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\tfrom (\n" +
             "\t\tselect *\t\n" +
             "\t\tfrom weibo_user_works \n" +
-            "\t\twhere is_delete!='1' and user_id in :userIds and id not in :workIds\n" +
-            "\t\tand (share_scope!='2' or (share_scope='2' and user_id=:userId)) order by hot desc,create_time desc limit :start,:size\n" +
+            "\t\twhere is_delete!='1' and user_id not in :userIds and id not in :workIds\n" +
+            "\t\tand (share_scope='0' or (\n" +
+            "\t\t\t\tshare_scope='1' and user_id in (\n" +
+            "\t\t\t\tselect to_user_id from weibo_user_follower where user_id=:userId)\n" +
+            "\t\t\t)\n" +
+            "\t\t)\t\n" +
+            "\t\torder by create_time desc limit :start,:size\n" +
             "\t) t1 left join (\n" +
             "\t\tselect DISTINCT work_id id from weibo_user_works_interaction t\n" +
             "\t\twhere t.user_id = :userId and t.type = '0'\n" +
@@ -69,7 +74,7 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t) t3 on t1.id = t3.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname nickname2,head_img head_img2 from weibo_user\n" +
-            "\t) t4 on t1.user_id=t4.id", nativeQuery = true)
+            "\t) t4 on t1.user_id=t4.id order by t1.create_time desc", nativeQuery = true)
     List<Map<String, Object>> getFollowHotListForUser(@Param(value = "userIds") List<String> userIds, @Param(value = "workIds") List<String> workIds,
                                                       @Param(value = "userId") String userId,@Param(value = "start") int start,
                                                       @Param(value = "size") int size);
@@ -78,8 +83,13 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\tfrom (\n" +
             "\t\tselect *\t\n" +
             "\t\tfrom weibo_user_works \n" +
-            "\t\twhere is_delete!='1' and user_id in :userIds and id not in :workIds\n" +
-            "\t\tand (share_scope!='2' or (share_scope='2' and user_id=:userId)) order by create_time desc limit :start,:size\n" +
+            "\t\twhere is_delete!='1' and user_id not in :userIds and id not in :workIds\n" +
+            "\t\tand (share_scope='0' or (\n" +
+            "\t\t\t\tshare_scope='1' and user_id in (\n" +
+            "\t\t\t\tselect to_user_id from weibo_user_follower where user_id=:userId)\n" +
+            "\t\t\t)\n" +
+            "\t\t)\t\n" +
+            "\t\torder by create_time desc limit :start,:size\n" +
             "\t) t1 left join (\n" +
             "\t\tselect DISTINCT work_id id from weibo_user_works_interaction t\n" +
             "\t\twhere t.user_id = :userId and t.type = '0'\n" +
@@ -90,7 +100,7 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t) t3 on t1.id = t3.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname nickname2,head_img head_img2 from weibo_user\n" +
-            "\t) t4 on t1.user_id=t4.id", nativeQuery = true)
+            "\t) t4 on t1.user_id=t4.id order by t1.create_time desc", nativeQuery = true)
     List<Map<String, Object>> getFollowAllListForUser(@Param(value = "userIds") List<String> userIds, @Param(value = "workIds") List<String> workIds,
                                                       @Param(value = "userId") String userId,@Param(value = "start") int start,
                                                       @Param(value = "size") int size);
@@ -160,6 +170,9 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t) t4 on t1.user_id=t4.id", nativeQuery = true)
     List<Map<String, Object>> getUserWorkList(@Param(value = "userId") String userId,@Param(value = "start") int start,
                                               @Param(value = "size") int size);
+
+    @Query(value = "select count(*) from weibo_user_works where user_id=:userId and is_delete!=1", nativeQuery = true)
+    int getOneWorksTotal(@Param(value = "userId") String userId);
 
 
     @Query(value = "select * from weibo_user_works where is_delete != '1'", nativeQuery = true)

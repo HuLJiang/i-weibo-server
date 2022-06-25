@@ -9,7 +9,7 @@ public interface AdminService {
 
     ResultBody addUser();
 
-    ResultBody delete(String userId);
+    ResultBody delete(String id,String type);
 
     ResultBody resetPassword(String userId);
 

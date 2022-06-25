@@ -113,6 +113,8 @@ public interface UserService {
 
     ResultBody black(String id,String type);
 
+    ResultBody resetPsd(ResetPsdDto resetPsdDto);
+
     //非对外接口，内部使用
     boolean deleteUser(User user);
     //非对外接口，内部使用

@@ -22,8 +22,8 @@ public class AdminController {
     }
 
     @GetMapping("/delete")
-    ResultBody delete(@RequestParam String userId) {
-        return adminService.delete(userId);
+    ResultBody delete(@RequestParam String id,@RequestParam String type) {
+        return adminService.delete(id,type);
     }
 
     @GetMapping("/resetPassword")

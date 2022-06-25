@@ -239,4 +239,11 @@ public class UserController {
     public ResultBody black(@RequestParam String id,@RequestParam String type) {
         return userService.black(id,type);
     }
+
+
+    @PostMapping("/resetPsd")
+    @ApiOperation(value = "关注的作品列表", notes = "关注的作品列表")
+    public ResultBody resetPsd(@RequestBody @Validated ResetPsdDto resetPsdDto) {
+        return userService.resetPsd(resetPsdDto);
+    }
 }

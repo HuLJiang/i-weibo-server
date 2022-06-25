@@ -47,6 +47,7 @@ public class AdminServiceImpl implements AdminService {
         user.setIsDelete("0");
         user.setIsBan("0");
         user.setRole(1);
+        user.setIsLock("0");
         user = userRepository.save(user);
         user.setPassword(password);
         Map<String, Object> result = new HashMap<>();
@@ -55,15 +56,32 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResultBody delete(String userId) {
-        Optional<User> userOptional = userRepository.findById(userId);
-        if(userOptional.isPresent()) {
-            User user = userOptional.get();
-            int role = Constants.ADMIN.getValue() + Constants.SUPER_ADMIN.getValue();
-            if((user.getRole() & role) == 0 && userService.deleteUser(user)) {
+    public ResultBody delete(String id,String type) {
+        if("0".equals(type)) {
+            Optional<User> userOptional = userRepository.findById(id);
+            if(userOptional.isPresent()) {
+                User user = userOptional.get();
+                int role = Constants.ADMIN.getValue() + Constants.SUPER_ADMIN.getValue();
+                if((user.getRole() & role) == 0 && userService.deleteUser(user)) {
+                    return ResultBody.success();
+                }
+            }
+        }else if("1".equals(type)) {
+            Optional<UserWork> userWorkOptional = workRepository.findById(id);
+            if(userWorkOptional.isPresent()) {
+                UserWork userWork = userWorkOptional.get();
+                userWork.setIsDelete("1");
+                workRepository.save(userWork);
+                Optional<User> userOptional = userRepository.findById(userWork.getUserId());
+                if(userOptional.isPresent()) {
+                    User user = userOptional.get();
+                    user.setAllNum(user.getAllNum() - 1);
+                    userRepository.save(user);
+                }
                 return ResultBody.success();
             }
         }
+
         return ResultBody.fail();
     }
 

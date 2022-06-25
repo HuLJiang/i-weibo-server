@@ -287,9 +287,13 @@ public class UserServiceImpl implements UserService {
         if(user == null) {
             Optional<UserWork> userWorkOptional = workRepository.findById(workId);
             if(!userWorkOptional.isPresent()) {
-                return ResultBody.fail();
+                return ResultBody.fail("作品不存在");
             }
-            workVo = workPojoToVo(userWorkOptional.get());
+            UserWork userWork = userWorkOptional.get();
+            if(Constants.COMMON_TRUE.getVal().equals(userWork.getIsDelete())) {
+                return ResultBody.fail("作品不存在");
+            }
+            workVo = workPojoToVo(userWork);
             User user1 = userRepository.findAllByUsername(workVo.getUsername());
             workVo.setUsername(user1.getNickname());
             workVo.setHeadImg(user1.getHeadImg());
@@ -424,8 +428,10 @@ public class UserServiceImpl implements UserService {
         int start = getPageStart(pageQuery);
         List<Map<String, Object>> maps = workRepository.getUserWorkList(userId,start,pageQuery.getPageSize());
         List<WorkVo> rows = setAttach(maps);
+        int total = workRepository.getOneWorksTotal(userId);
         Map<String, Object> result = new HashMap<>();
         result.put("rows",rows);
+        result.put("total",total);
         return result;
     }
 
@@ -442,13 +448,12 @@ public class UserServiceImpl implements UserService {
         List<String> workBlacks;
         List<String> userIds = new ArrayList<>();
         String userId = user.getId();
-        int total = followerRepository.getFollowerTotal(userId);
-        if(total > 0) {
-            Pageable pageable1 = PageRequest.of(0,total);
-            userIds = followerRepository.getFollowerIds(userId,pageable1);
-        }
-        //自己也算自己的关注
-        userIds.add(userId);
+//        int total = followerRepository.getFollowerTotal(userId);
+//        if(total > 0) {
+//            Pageable pageable1 = PageRequest.of(0,total);
+//            userIds = followerRepository.getFollowerIds(userId,pageable1);
+//        }
+        userIds = blackListRepository.getUserBlack(userId);
         workBlacks = workBlackRepository.getWorkBlack(userId);
         List<Map<String, Object>> userWorks = getList(workListDto,userIds,workBlacks,
                 Constants.WORK_LIST_FOLLOW.getValue(),workListDto.getNewest(),user);
@@ -1119,6 +1124,22 @@ public class UserServiceImpl implements UserService {
             return ResultBody.fail("信息有误");
         }
         return ResultBody.success();
+    }
+
+    @Override
+    public ResultBody resetPsd(ResetPsdDto resetPsdDto) {
+        User user = SessionUtil.getUser();
+        if(user.getPassword().equals(UserUtil.setMd5Password(resetPsdDto.getOldPassword()))) {
+            if(resetPsdDto.getPassword().equals(resetPsdDto.getRePassword())) {
+                user.setPassword(UserUtil.setMd5Password(resetPsdDto.getPassword()));
+                userRepository.save(user);
+                SessionUtil.setUser(user);
+                return ResultBody.success();
+            }else {
+                return ResultBody.fail("两次密码不一致");
+            }
+        }
+        return ResultBody.fail("原密码错误");
     }
 
     private TalkVo mapToTalkVo(Map<String, Object> item) {
