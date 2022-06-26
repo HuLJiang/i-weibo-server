@@ -140,7 +140,7 @@ public class WebConfig implements WebMvcConfigurer {
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
-                .enable(true)
+                .enable(false)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("top.hwlljy.controller"))
                 .paths(PathSelectors.any())

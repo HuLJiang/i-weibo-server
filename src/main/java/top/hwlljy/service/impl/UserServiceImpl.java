@@ -514,11 +514,13 @@ public class UserServiceImpl implements UserService {
         workVo.setCreateTime(userWork.getCreateTime());
         workVo.setHeadImg(userWork.getHeadImg());
         workVo.setUserNickname(userWork.getUserNickname());
+        workVo.setUserId(userWork.getUserId());
         workVo.setUpNum(userWork.getUpNum());
         workVo.setTalkNum(userWork.getTalkNum());
         workVo.setReshareNum(userWork.getReshareNum());
         workVo.setShareScope(userWork.getShareScope());
         workVo.setUsername(userWork.getUsername());
+        workVo.setHasAttaches(userWork.getHasAttaches());
         if(user != null) {
             String id = user.getId();
             workVo.setIsFollow(userCache.checkIsFollow(id,userWork.getUserId()) ? "1" : "0");
@@ -949,6 +951,9 @@ public class UserServiceImpl implements UserService {
             user.setSex("");
             followerRepository.deleteAllByUserIdAndToUserId(user.getId(),user.getId());
             userRepository.save(user);
+            List<UserWork> userWorks = workRepository.findAllByUserId(user.getId());
+            userWorks.forEach(item -> item.setIsDelete("1"));
+            workRepository.saveAll(userWorks);
         } catch (Exception e) {
             log.error(e.getMessage(),e);
             return false;

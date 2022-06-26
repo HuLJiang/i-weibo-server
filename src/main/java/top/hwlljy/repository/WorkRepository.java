@@ -63,7 +63,7 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t\t\t\tselect to_user_id from weibo_user_follower where user_id=:userId)\n" +
             "\t\t\t)\n" +
             "\t\t)\t\n" +
-            "\t\torder by create_time desc limit :start,:size\n" +
+            "\t\torder by hot desc,create_time desc limit :start,:size\n" +
             "\t) t1 left join (\n" +
             "\t\tselect DISTINCT work_id id from weibo_user_works_interaction t\n" +
             "\t\twhere t.user_id = :userId and t.type = '0'\n" +
@@ -74,7 +74,7 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
             "\t) t3 on t1.id = t3.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname nickname2,head_img head_img2 from weibo_user\n" +
-            "\t) t4 on t1.user_id=t4.id order by t1.create_time desc", nativeQuery = true)
+            "\t) t4 on t1.user_id=t4.id order by t1.hot desc,t1.create_time desc", nativeQuery = true)
     List<Map<String, Object>> getFollowHotListForUser(@Param(value = "userIds") List<String> userIds, @Param(value = "workIds") List<String> workIds,
                                                       @Param(value = "userId") String userId,@Param(value = "start") int start,
                                                       @Param(value = "size") int size);
@@ -198,7 +198,8 @@ public interface WorkRepository extends JpaRepository<UserWork, String> {
     @Query(value = "update weibo_user_works set hot=0 where create_time<:theDate", nativeQuery = true)
     void updateHot(@Param(value = "theDate")Date theDate);
 
-    @Query(value = "select * from weibo_user_works where create_time <= end and create_time > start", nativeQuery = true)
+    @Query(value = "select * from weibo_user_works where create_time <= :end and create_time > :start", nativeQuery = true)
     List<UserWork> getUserWorkBetween(@Param(value = "start") Date start,@Param(value = "end") Date end);
 
+    List<UserWork> findAllByUserId(String userId);
 }

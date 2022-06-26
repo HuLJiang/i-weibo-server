@@ -60,7 +60,7 @@ public interface WorkInteractionRepository extends JpaRepository<UserWorksIntera
             "\t) t2 on t1.user_id=t2.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,content from weibo_user_works where user_id=:userId\n" +
-            "\t) t3 on t1.work_id=t3.id",nativeQuery = true)
+            "\t) t3 on t1.work_id=t3.id order by t1.create_time desc",nativeQuery = true)
     List<Map<String, Object>> getLikeMeList(@Param(value = "userId") String userId,@Param(value = "start") int start,
                                             @Param(value = "size") int size);
 
@@ -80,7 +80,7 @@ public interface WorkInteractionRepository extends JpaRepository<UserWorksIntera
             "\t) t4 on t1.to_user_id=t4.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname,head_img from weibo_user\n" +
-            "\t) t5 on t3.user_id=t5.id",nativeQuery = true)
+            "\t) t5 on t3.user_id=t5.id order by t1.create_time desc",nativeQuery = true)
     List<Map<String, Object>> getMyTalk(@Param(value = "userId") String userId,@Param(value = "start") int start,
                                         @Param(value = "size") int size);
 
@@ -97,7 +97,7 @@ public interface WorkInteractionRepository extends JpaRepository<UserWorksIntera
             "\t) t3 on t1.work_id=t3.id\n" +
             "\tleft join (\n" +
             "\t\tselect id,nickname,head_img from weibo_user\n" +
-            "\t) t5 on t3.user_id=t5.id",nativeQuery = true)
+            "\t) t5 on t3.user_id=t5.id order by t1.create_time desc",nativeQuery = true)
     List<Map<String, Object>> getToMyTalk(@Param(value = "userId") String userId,@Param(value = "start") int start,
                                         @Param(value = "size") int size);
 

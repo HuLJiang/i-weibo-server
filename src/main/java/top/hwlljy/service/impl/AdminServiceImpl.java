@@ -93,6 +93,9 @@ public class AdminServiceImpl implements AdminService {
         if(userOptional.isPresent()) {
             User user = userOptional.get();
             user.setPassword(UserUtil.setMd5Password(password));
+            user.setIsLock("0");
+            user.setTryLoginTimes(0);
+            userRepository.save(user);
             result.put("data",password);
             return ResultBody.success(result);
         }
